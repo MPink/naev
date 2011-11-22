@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Fleets>
  <fleet name="Independent Schroedinger">
   <ai>independent</ai>
@@ -511,6 +511,13 @@
   <faction>Empire</faction>
   <pilots>
    <pilot name="Empire Admonisher" ship="Empire Admonisher"></pilot>
+  </pilots>
+ </fleet>
+ <fleet name="Empire Rhino">
+  <ai>empire</ai>
+  <faction>Empire</faction>
+  <pilots>
+   <pilot name="Empire Rhino" ship="Rhino"></pilot>
   </pilots>
  </fleet>
  <fleet name="Trinity">

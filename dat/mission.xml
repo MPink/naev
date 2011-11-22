@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Missions>
  <mission name="Tutorial Mission">
   <lua>tutorial/tutmis</lua>
@@ -233,6 +233,17 @@
    <chance>100</chance>
    <location>Bar</location>
    <planet>Omega Station</planet>
+  </avail>
+ </mission>
+ <mission name="Empires Rhinos 1">
+  <lua>empire/pirate_rhinos/rhino_00</lua>
+  <avail>
+   <priority>3</priority>
+   <cond>faction.playerStanding("Empire") &gt;= 30 and var.peek("es_cargo") == true</cond>
+   <chance>90</chance>
+   <done>Empire Shipping 3</done>
+   <location>Bar</location>
+   <faction>Empire</faction>
   </avail>
  </mission>
  <mission name="Nebula Satellite">
