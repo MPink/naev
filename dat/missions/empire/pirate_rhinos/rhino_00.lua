@@ -1,12 +1,6 @@
 --[[
    pirate_rhinos 1 of 3
    
-   got to sys
-   check jumps
-   triger attack when near a jump
-   save distreased ship or fail mission
-   escort ship home
-   
    stages
    0) go to sys
    1) trigger pirate attack
@@ -43,6 +37,7 @@ else -- default english
    title[3] = "Distress Call"
    title[4] = "Rhino Saved"
    title[5] = "Mission Report"
+   title[6] = "Mission Failed"
    
    text = {}
    text[1] = [[You approach the Empire Commander.
@@ -58,9 +53,14 @@ You:"Why dont you guys have escorts ?"
 Rhino:"There is only a limited supply of pilots capable of escorting over such a long range and we drew the short straw. Its good to see Bert has found someone to help out at last though."
 
 You:"My patrol is about done hear so i will escort you the rest of the way"]]
-   text[5] = [["Hi %s. Glad to see you back in one pice. The last pilot that patrolled there come to a bad end. The %s informed me of your help and your sensor logs have provided vital intel into this new threat. We must resecure these trade lanes against these pirates. Im having missile jammers fitted to all the rhinos and have suspended the routes for ships without them. Its only a matter of time before they find a new security hole and change tactics again though."
-   
-"I have an idea but need to get some things in place. Meet me in the bar shortly if your up for some payback and ill tell you every thing"]]
+   text[5] = [[Comander Bert is waiting for you in the hanger
+"Hi %s. Glad to see you back in one pice. The last pilot that patrolled there come to a bad end. The %s informed me of your help and your sensor logs have provided vital intel into this new threat. We must resecure these trade lanes against these pirates. Im having missile jammers fitted to all the rhinos and have suspended the routes for ships without them. Its only a matter of time before they find a new security hole and change tactics again though."
+
+Bert's face suddenly changes to resemble someone who's just been hit on the head
+"I have an idea but need to get some things in place. Meet me in the bar shortly if your up for some payback and ill tell you every thing"
+
+It looks like Burt has a hard time thinking and you can wonder what crazy plan he is hatching]]
+   text[6] = [[Mission failure due to jumping before your escort]]
 end
 
 
@@ -131,11 +131,11 @@ end
 
 -- check for end of mission
 function land ()
-   if misn_stage==4 then
+   if misn_stage==4 and planet.cur()==base_planet then
       tk.msg(title[5], string.format( text[5], player.name(), rhino_name))
       player.pay( reward )
       faction.modPlayerSingle("Dvaered", 2 )
-      faction.modPlayerSingle("PIRATE", -4)
+      faction.modPlayerSingle("Pirate", -4)
       misn.finish(true)
    end
 end
@@ -146,7 +146,6 @@ function jumpin ()
    hook.timer(500,"delayed_jumpin")
 end
 function delayed_jumpin ()
-   print(string.format("delayed_jumpin stage=%d",misn_stage))
    if system.cur()==jump_route[2] then
       if misn_stage==0 then
          misn_stage=1
@@ -161,12 +160,10 @@ function delayed_jumpin ()
    
    if misn_stage==3 then
       if not rhino_has_jumped then
-         print("misn end no rhino jump")
-         -- display a you fucked up msg
+         tk.msg( title[6], text[6] )
          misn.finish(false)
       else
          -- setup rhino
-         print("rhino setup")
          rhino_has_jumped=false
          rhino = pilot.add("Empire Rhino", "empire",  system.cur():jumpPos(jump_route[jump_index-1]), "Empire" )[1]
          rhino:setHilight(true)
@@ -252,6 +249,7 @@ function timing_loop ()
             end
          end
       end
+   -- hack to disable rhino as dave cant do it on his own :(
    else
       if rhino:exists() and adm:exists() then
          if (rhino:pos()-adm:pos()):dist()<pirates_disable_hack_range then
@@ -264,7 +262,7 @@ function timing_loop ()
 end
 
 function lost_ship ()
-   --reset pirate control
+   -- reset pirate control
    if adm:exists() then
       adm:setHilight(false)
       adm:setVisplayer(false)
@@ -273,22 +271,20 @@ function lost_ship ()
       adm:control(false)
    end
    
-   --transfer rhino to pirates
+   -- transfer rhino to pirates
    if rhino:exists() then
       rhino:setHilight(false)
       rhino:setVisplayer(false)
       rhino:changeAI("pirate")
       rhino:setFaction("Pirate")
-      hook.timer(5000,"restart_rhino")-- hack needed due to disable hack :(
-      print("lost_ship rhino restart timer started")
+      hook.timer(5000,"restart_rhino")-- hack needed due to fix disable hack :(
    else
-      --ships dead so mission is over
+      -- ships dead so mission is over
       misn.finish(false)
    end
 end
 
 function restart_rhino ()
-   print("rhino_restart_hack")
    rhino:setHealth(100,1,0)
    rhino:taskClear()
    rhino:control(false)
@@ -308,7 +304,6 @@ function pirate_dead ()
 end
 
 function rhino_jumped ()
-   print("rhino_jumped")
    rhino_has_jumped = true
    jump_index = jump_index+1
    misn.markerMove( misn_marker,jump_route[jump_index])
